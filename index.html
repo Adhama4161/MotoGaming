@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ankur Dhama Motoracing Game</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #222; }
+    canvas { display: block; margin: auto; background: #555; }
+    .controls {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      display: grid; grid-template-columns: 60px 60px 60px;
+      grid-template-rows: 60px 60px; gap: 10px;
+    }
+    .btn {
+      background: rgba(255,255,255,0.2); border: 2px solid white;
+      color: white; font-size: 18px; display: flex; 
+      align-items: center; justify-content: center;
+      border-radius: 10px; user-select: none;
+    }
+  </style>
+</head>
+<body>
+<canvas id="gameCanvas" width="400" height="600"></canvas>
+
+<div class="controls">
+  <div></div>
+  <div class="btn" id="up">⬆</div>
+  <div></div>
+  <div class="btn" id="left">⬅</div>
+  <div class="btn" id="down">⬇</div>
+  <div class="btn" id="right">➡</div>
+</div>
+
+<script>
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+let player = { x: 180, y: 500, w: 40, h: 60, speed: 4 };
+let coins = [];
+let vehicles = [];
+let score = 0;
+let coinCount = 0;
+let gameOver = false;
+let paused = false;
+
+let move = { left:false, right:false, up:false, down:false };
+
+document.getElementById("left").onmousedown = ()=>move.left=true;
+document.getElementById("left").ontouchstart = ()=>move.left=true;
+document.getElementById("left").onmouseup = ()=>move.left=false;
+document.getElementById("left").ontouchend = ()=>move.left=false;
+
+document.getElementById("right").onmousedown = ()=>move.right=true;
+document.getElementById("right").ontouchstart = ()=>move.right=true;
+document.getElementById("right").onmouseup = ()=>move.right=false;
+document.getElementById("right").ontouchend = ()=>move.right=false;
+
+document.getElementById("up").onmousedown = ()=>move.up=true;
+document.getElementById("up").ontouchstart = ()=>move.up=true;
+document.getElementById("up").onmouseup = ()=>move.up=false;
+document.getElementById("up").ontouchend = ()=>move.up=false;
+
+document.getElementById("down").onmousedown = ()=>move.down=true;
+document.getElementById("down").ontouchstart = ()=>move.down=true;
+document.getElementById("down").onmouseup = ()=>move.down=false;
+document.getElementById("down").ontouchend = ()=>move.down=false;
+
+// Keyboard controls too
+document.addEventListener("keydown", e=>{
+  if(e.key==="ArrowLeft") move.left=true;
+  if(e.key==="ArrowRight") move.right=true;
+  if(e.key==="ArrowUp") move.up=true;
+  if(e.key==="ArrowDown") move.down=true;
+});
+document.addEventListener("keyup", e=>{
+  if(e.key==="ArrowLeft") move.left=false;
+  if(e.key==="ArrowRight") move.right=false;
+  if(e.key==="ArrowUp") move.up=false;
+  if(e.key==="ArrowDown") move.down=false;
+});
+
+function spawnCoin() {
+  coins.push({ x: Math.random()*360, y: -20, r: 8 });
+}
+function spawnVehicle() {
+  vehicles.push({ x: Math.random()*360, y: -60, w:40, h:60 });
+}
+
+function update() {
+  if (paused || gameOver) return;
+
+  if(move.left && player.x>0) player.x -= player.speed;
+  if(move.right && player.x<canvas.width-player.w) player.x += player.speed;
+  if(move.up && player.y>0) player.y -= player.speed;
+  if(move.down && player.y<canvas.height-player.h) player.y += player.speed;
+
+  // Spawn
+  if(Math.random()<0.03) spawnCoin();
+  if(Math.random()<0.04) spawnVehicle();
+
+  // Move coins & vehicles
+  coins.forEach(c=>c.y+=3);
+  vehicles.forEach(v=>v.y+=4);
+
+  // Collision with coins
+  coins = coins.filter(c=>{
+    if(c.x>player.x && c.x<player.x+player.w && c.y>player.y && c.y<player.y+player.h){
+      coinCount++; score+=10; return false;
+    }
+    return c.y<canvas.height;
+  });
+
+  // Collision with vehicles
+  for(let v of vehicles){
+    if(player.x < v.x+v.w && player.x+player.w>v.x && player.y< v.y+v.h && player.y+player.h>v.y){
+      gameOver = true;
+    }
+  }
+  vehicles = vehicles.filter(v=>v.y<canvas.height);
+
+  score++;
+}
+
+function draw() {
+  ctx.fillStyle = "black";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+
+  // Road
+  ctx.fillStyle="#333";
+  ctx.fillRect(60,0,280,canvas.height);
+
+  // Player
+  ctx.fillStyle="blue";
+  ctx.fillRect(player.x,player.y,player.w,player.h);
+  ctx.fillStyle="white";
+  ctx.font="12px Arial";
+  ctx.fillText("Yashi the Rider",player.x-5,player.y-5);
+
+  // Coins
+  ctx.fillStyle="yellow";
+  coins.forEach(c=>{
+    ctx.beginPath(); ctx.arc(c.x,c.y,c.r,0,Math.PI*2); ctx.fill();
+  });
+
+  // Vehicles
+  ctx.fillStyle="red";
+  vehicles.forEach(v=>ctx.fillRect(v.x,v.y,v.w,v.h));
+
+  // Score & Coins
+  ctx.fillStyle="white";
+  ctx.font="16px Arial";
+  ctx.fillText("Score: "+score,10,20);
+  ctx.fillText("Coins: "+coinCount,10,40);
+
+  if(gameOver){
+    ctx.fillStyle="rgba(0,0,0,0.7)";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle="white";
+    ctx.font="28px Arial";
+    ctx.fillText("Game Over!",120,250);
+    ctx.fillText("Score: "+score,140,300);
+    ctx.fillText("Replay?",140,350);
+    canvas.addEventListener("click",()=>location.reload());
+  }
+}
+
+function loop(){
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+</html>
