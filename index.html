@@ -10,7 +10,7 @@
     .controls {
       position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
       display: grid; grid-template-columns: 60px 60px 60px;
-      grid-template-rows: 60px 60px; gap: 20px;
+      grid-template-rows: 60px 60px; gap: 20px; /* Increased gap for more spacing */
     }
     .btn {
       background: rgba(255,255,255,0.2); border: 2px solid white;
@@ -39,12 +39,6 @@ const ctx = canvas.getContext("2d");
 // Set canvas size to full screen
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
-
-// Load images
-const playerImage = new Image();
-playerImage.src = "bike.png";
-const vehicleImage = new Image();
-vehicleImage.src = "bmw-bike.png";
 
 let player = { x: canvas.width/2-20, y: canvas.height-100, w: 40, h: 60, speed: 4 };
 let coins = [];
@@ -141,12 +135,8 @@ function draw() {
   ctx.fillRect(canvas.width*0.15,0,canvas.width*0.7,canvas.height);
 
   // Player
-  if (playerImage.complete) {
-    ctx.drawImage(playerImage, player.x, player.y, player.w, player.h);
-  } else {
-    ctx.fillStyle="blue";
-    ctx.fillRect(player.x,player.y,player.w,player.h);
-  }
+  ctx.fillStyle="blue";
+  ctx.fillRect(player.x,player.y,player.w,player.h);
   ctx.fillStyle="white";
   ctx.font="12px Arial";
   ctx.fillText("Yashi the Rider",player.x-5,player.y-5);
@@ -158,12 +148,8 @@ function draw() {
   });
 
   // Vehicles
-  if (vehicleImage.complete) {
-    vehicles.forEach(v=>ctx.drawImage(vehicleImage, v.x, v.y, v.w, v.h));
-  } else {
-    ctx.fillStyle="red";
-    vehicles.forEach(v=>ctx.fillRect(v.x,v.y,v.w,v.h));
-  }
+  ctx.fillStyle="red";
+  vehicles.forEach(v=>ctx.fillRect(v.x,v.y,v.w,v.h));
 
   // Score & Coins
   ctx.fillStyle="white";
