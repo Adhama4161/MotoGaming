@@ -2,14 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Ankur Dhama Motoracing Game</title>
   <style>
     body { margin: 0; overflow: hidden; background: #222; }
-    canvas { display: block; margin: auto; background: #555; }
+    canvas { display: block; width: 100vw; height: 100vh; background: #555; }
     .controls {
       position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
       display: grid; grid-template-columns: 60px 60px 60px;
-      grid-template-rows: 60px 60px; gap: 10px;
+      grid-template-rows: 60px 60px; gap: 20px; /* Increased gap for more spacing */
     }
     .btn {
       background: rgba(255,255,255,0.2); border: 2px solid white;
@@ -20,7 +21,7 @@
   </style>
 </head>
 <body>
-<canvas id="gameCanvas" width="400" height="600"></canvas>
+<canvas id="gameCanvas"></canvas>
 
 <div class="controls">
   <div></div>
@@ -35,7 +36,11 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-let player = { x: 180, y: 500, w: 40, h: 60, speed: 4 };
+// Set canvas size to full screen
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let player = { x: canvas.width/2-20, y: canvas.height-100, w: 40, h: 60, speed: 4 };
 let coins = [];
 let vehicles = [];
 let score = 0;
@@ -65,7 +70,7 @@ document.getElementById("down").ontouchstart = ()=>move.down=true;
 document.getElementById("down").onmouseup = ()=>move.down=false;
 document.getElementById("down").ontouchend = ()=>move.down=false;
 
-// Keyboard controls too
+// Keyboard controls
 document.addEventListener("keydown", e=>{
   if(e.key==="ArrowLeft") move.left=true;
   if(e.key==="ArrowRight") move.right=true;
@@ -80,10 +85,10 @@ document.addEventListener("keyup", e=>{
 });
 
 function spawnCoin() {
-  coins.push({ x: Math.random()*360, y: -20, r: 8 });
+  coins.push({ x: Math.random()*(canvas.width-40), y: -20, r: 8 });
 }
 function spawnVehicle() {
-  vehicles.push({ x: Math.random()*360, y: -60, w:40, h:60 });
+  vehicles.push({ x: Math.random()*(canvas.width-40), y: -60, w:40, h:60 });
 }
 
 function update() {
@@ -127,7 +132,7 @@ function draw() {
 
   // Road
   ctx.fillStyle="#333";
-  ctx.fillRect(60,0,280,canvas.height);
+  ctx.fillRect(canvas.width*0.15,0,canvas.width*0.7,canvas.height);
 
   // Player
   ctx.fillStyle="blue";
@@ -157,9 +162,9 @@ function draw() {
     ctx.fillRect(0,0,canvas.width,canvas.height);
     ctx.fillStyle="white";
     ctx.font="28px Arial";
-    ctx.fillText("Game Over!",120,250);
-    ctx.fillText("Score: "+score,140,300);
-    ctx.fillText("Replay?",140,350);
+    ctx.fillText("Game Over!",canvas.width/2-80,canvas.height/2-50);
+    ctx.fillText("Score: "+score,canvas.width/2-60,canvas.height/2);
+    ctx.fillText("Replay?",canvas.width/2-60,canvas.height/2+50);
     canvas.addEventListener("click",()=>location.reload());
   }
 }
